@@ -32,11 +32,12 @@ export default function MultiStepForm({ initialLoanType = '', onClose }) {
   const [step, setStep] = useState(1);
   const [direction, setDirection] = useState(1);
   const [loading, setLoading] = useState(false);
-  const [formData, setFormData] = useState({ loanType: initialLoanType, loanAmount: '', customAmount: '', employmentType: '', monthlyIncome: '', hasExistingEmi: '', existingEmiAmount: '', cibilScore: '', city: '', state: '', fullName: '', mobile: '', email: '', consent: false });
+  const [formData, setFormData] = useState({ loanType: initialLoanType, loanAmount: '', customAmount: '', employmentType: '', monthlyIncome: '', annualIncome: '', hasGst: '', hasExistingEmi: '', existingEmiAmount: '', cibilScore: '', city: '', state: '', pincode: '', fullName: '', mobile: '', email: '', consent: false });
   const { toast } = useToast();
   const navigate = useNavigate();
 
   const update = (key, value) => setFormData(prev => ({ ...prev, [key]: value }));
+  const isBusinessEmployment = ['business-owner', 'self-employed'].includes(formData.employmentType);
 
   const goNext = () => { setDirection(1); setStep(s => Math.min(s + 1, TOTAL_STEPS)); };
   const goBack = () => { setDirection(-1); setStep(s => Math.max(s - 1, 1)); };
@@ -46,10 +47,10 @@ export default function MultiStepForm({ initialLoanType = '', onClose }) {
       case 1: return !!formData.loanType;
       case 2: return !!formData.loanAmount || (formData.loanAmount === 'custom' && formData.customAmount);
       case 3: return !!formData.employmentType;
-      case 4: return !!formData.monthlyIncome;
+      case 4: return isBusinessEmployment ? !!formData.hasGst && !!formData.annualIncome : !!formData.monthlyIncome;
       case 5: return !!formData.hasExistingEmi;
       case 6: return !!formData.cibilScore;
-      case 7: return !!formData.city && !!formData.state;
+      case 7: return !!formData.city && !!formData.state && /^\d{6}$/.test(formData.pincode);
       case 8: return !!formData.fullName && /^[6-9]\d{9}$/.test(formData.mobile);
       case 9: return formData.consent;
       default: return true;
@@ -65,11 +66,14 @@ export default function MultiStepForm({ initialLoanType = '', onClose }) {
         loanType: formData.loanType,
         loanAmount: formData.loanAmount === 'custom' ? formData.customAmount : formData.loanAmount,
         employmentType: formData.employmentType,
-        monthlyIncome: formData.monthlyIncome,
+        monthlyIncome: isBusinessEmployment ? null : formData.monthlyIncome,
+        annualIncome: isBusinessEmployment ? formData.annualIncome : null,
+        hasGst: isBusinessEmployment ? formData.hasGst : null,
         existingEmi: formData.hasExistingEmi === 'yes' ? formData.existingEmiAmount : 0,
         cibilScore: formData.cibilScore,
         city: formData.city,
         state: formData.state,
+        pincode: formData.pincode,
         fullName: formData.fullName,
         mobile: formData.mobile,
         email: formData.email,
@@ -156,14 +160,21 @@ export default function MultiStepForm({ initialLoanType = '', onClose }) {
 
             {step === 4 && (
               <div>
-                <h3 className="text-lg font-display font-bold text-neutral-900 mb-1">What is your monthly income?</h3>
-                <p className="text-sm text-neutral-500 mb-4">Enter your approximate monthly income</p>
+                <h3 className="text-lg font-display font-bold text-neutral-900 mb-1">{isBusinessEmployment ? 'Tell us about your business income' : 'What is your monthly income?'}</h3>
+                <p className="text-sm text-neutral-500 mb-4">{isBusinessEmployment ? 'Share your GST status and approximate yearly income' : 'Enter your approximate monthly income'}</p>
                 <div className="relative">
                   <span className="absolute left-4 top-1/2 -translate-y-1/2 text-neutral-500 font-medium">₹</span>
-                  <input type="number" placeholder="e.g. 50000" value={formData.monthlyIncome}
-                    onChange={e => update('monthlyIncome', e.target.value)}
+                  <input type="number" placeholder={isBusinessEmployment ? 'e.g. 600000' : 'e.g. 50000'} value={isBusinessEmployment ? formData.annualIncome : formData.monthlyIncome}
+                    onChange={e => update(isBusinessEmployment ? 'annualIncome' : 'monthlyIncome', e.target.value)}
                     className="input-field pl-8" />
                 </div>
+                {isBusinessEmployment && <div className="mt-4">
+                  <p className="label">Do you have GST registration?</p>
+                  <div className="grid grid-cols-2 gap-2">
+                    <OptionCard selected={formData.hasGst === 'yes'} onClick={() => update('hasGst', 'yes')}>Yes</OptionCard>
+                    <OptionCard selected={formData.hasGst === 'no'} onClick={() => update('hasGst', 'no')}>No</OptionCard>
+                  </div>
+                </div>}
                 <p className="text-xs text-neutral-400 mt-2">Your income information is kept confidential</p>
               </div>
             )}
@@ -204,13 +215,18 @@ export default function MultiStepForm({ initialLoanType = '', onClose }) {
             {step === 7 && (
               <div>
                 <h3 className="text-lg font-display font-bold text-neutral-900 mb-1">Where are you located?</h3>
-                <p className="text-sm text-neutral-500 mb-4">Enter your current city and state</p>
+                <p className="text-sm text-neutral-500 mb-4">Enter your current city, state and PIN code</p>
                 <div className="space-y-3">
                   <input type="text" placeholder="City" value={formData.city} onChange={e => update('city', e.target.value)} className="input-field" />
                   <select value={formData.state} onChange={e => update('state', e.target.value)} className="input-field">
                     <option value="">Select State</option>
                     {INDIAN_STATES.map(s => <option key={s} value={s}>{s}</option>)}
                   </select>
+                  <input type="text" inputMode="numeric" placeholder="PIN Code *" value={formData.pincode} maxLength={6}
+                    onChange={e => update('pincode', e.target.value.replace(/\D/g, ''))} className="input-field" />
+                  {formData.pincode && !/^\d{6}$/.test(formData.pincode) && (
+                    <p className="text-xs text-brand-500">Enter a valid 6-digit PIN code</p>
+                  )}
                 </div>
               </div>
             )}
@@ -239,6 +255,7 @@ export default function MultiStepForm({ initialLoanType = '', onClose }) {
                   <div className="flex justify-between"><span className="text-neutral-500">Amount</span><span className="font-medium">₹{(formData.loanAmount === 'custom' ? formData.customAmount : formData.loanAmount)?.toLocaleString('en-IN')}</span></div>
                   <div className="flex justify-between"><span className="text-neutral-500">Employment</span><span className="font-medium capitalize">{formData.employmentType?.replace(/-/g, ' ')}</span></div>
                   <div className="flex justify-between"><span className="text-neutral-500">City</span><span className="font-medium">{formData.city}, {formData.state}</span></div>
+                  <div className="flex justify-between"><span className="text-neutral-500">PIN Code</span><span className="font-medium">{formData.pincode}</span></div>
                   <div className="flex justify-between"><span className="text-neutral-500">Name</span><span className="font-medium">{formData.fullName}</span></div>
                   <div className="flex justify-between"><span className="text-neutral-500">Mobile</span><span className="font-medium">{formData.mobile}</span></div>
                 </div>

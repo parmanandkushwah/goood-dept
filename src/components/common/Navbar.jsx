@@ -15,7 +15,7 @@ const calcLinks = [
 
 const navLinks = [
   { to: '/about', label: 'About' },
-  { to: '/contact', label: 'Contact' },
+  { to: '/contact', label: 'Contact Us' },
 ];
 
 function Logo() {

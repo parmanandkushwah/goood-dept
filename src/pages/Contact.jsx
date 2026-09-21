@@ -71,11 +71,11 @@ export default function Contact() {
                   </div>
                 ))}
               </div>
-              <div className="rounded-2xl border border-brand-100 bg-brand-50 p-3.5 sm:p-4">
+              {/* <div className="rounded-2xl border border-brand-100 bg-brand-50 p-3.5 sm:p-4">
                 <p className="mb-1 text-sm font-semibold text-brand-700">Business Hours</p>
                 <p className="text-xs text-brand-600 sm:text-sm">Monday – Saturday: 9:00 AM – 7:00 PM</p>
                 <p className="text-xs text-brand-600 sm:text-sm">Sunday: 10:00 AM – 4:00 PM</p>
-              </div>
+              </div> */}
             </motion.div>
 
             <motion.div variants={fadeInUp} initial="hidden" whileInView="visible" viewport={viewportConfig} className="card p-4 sm:p-5">
