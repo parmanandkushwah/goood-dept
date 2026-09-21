@@ -6,22 +6,38 @@ import { loanProductsApi } from '../../api';
 import { PageLoader } from '../../components/ui/Spinner';
 import { useToast } from '../../components/ui/Toast';
 
-const EMPTY_PRODUCT = { name: '', slug: '', description: '', benefits: '', eligibility: '', documents: '', amount: '', tenure: '', interestInfo: '', status: 'active', displayOrder: 0 };
+const LOAN_TYPES = [
+  { value: 'personal-loan', label: 'Personal Loan' },
+  { value: 'business-loan', label: 'Business Loan' },
+  { value: 'home-loan', label: 'Home Loan' },
+  { value: 'loan-against-property', label: 'Loan Against Property' },
+  { value: 'car-loan', label: 'Car Loan' },
+  { value: 'education-loan', label: 'Education Loan' },
+  { value: 'gold-loan', label: 'Gold Loan' },
+  { value: 'debt-consolidation', label: 'Debt Consolidation' },
+  { value: 'other', label: 'Other' },
+];
+
+const EMPTY_PRODUCT = { name: '', slug: '', loanType: '', description: '', shortDescription: '', minAmount: '', maxAmount: '', interestRateText: '', tenureText: '', benefits: '', eligibility: '', documents: '', isActive: true, displayOrder: 0 };
 
 export default function LoanProducts() {
   const { toast } = useToast();
   const qc = useQueryClient();
-  const [products, setProducts] = useState([]);
   const [showForm, setShowForm] = useState(false);
   const [editing, setEditing] = useState(null);
   const [form, setForm] = useState(EMPTY_PRODUCT);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const { data, isLoading } = useQuery({
+  const { data: queryData, isLoading, isError, error } = useQuery({
     queryKey: ['loan-products'],
     queryFn: () => loanProductsApi.getAll({ limit: 100 }),
-    onSuccess: (res) => setProducts(res.data?.data || []),
+    select: (res) => res.data?.data || [],
   });
+
+  // Debug logging
+  console.log('LoanProducts query:', { queryData, isLoading, isError, error });
+
+  const products = queryData || [];
 
   const createMutation = useMutation({
     mutationFn: (data) => loanProductsApi.create(data),
@@ -56,22 +72,42 @@ export default function LoanProducts() {
   });
 
   const handleSubmit = () => {
-    if (!form.name.trim() || !form.slug.trim() || !form.description.trim()) {
-      toast('Name, Slug, and Description are required', 'error');
+    if (!form.name.trim() || !form.slug.trim() || !form.loanType.trim() || !form.description.trim()) {
+      toast('Name, Slug, Loan Type, and Description are required', 'error');
       return;
     }
     setIsSubmitting(true);
+    const apiData = toApiData(form);
     if (editing) {
-      updateMutation.mutate({ id: editing.id, data: { ...form, displayOrder: Number(form.displayOrder) || 0 } });
+      updateMutation.mutate({ id: editing.id, data: apiData });
     } else {
-      createMutation.mutate(form);
+      createMutation.mutate(apiData);
     }
     setTimeout(() => setIsSubmitting(false), 500);
   };
 
+  const toFormData = (p) => ({
+    ...p,
+    displayOrder: p.displayOrder || 0,
+    benefits: Array.isArray(p.benefits) ? p.benefits.join('\n') : (p.benefits || ''),
+    eligibility: Array.isArray(p.eligibility) ? p.eligibility.join('\n') : (p.eligibility || ''),
+    documents: Array.isArray(p.documents) ? p.documents.join('\n') : (p.documents || ''),
+    isActive: p.isActive ?? true,
+  });
+
+  const toApiData = (form) => ({
+    ...form,
+    benefits: form.benefits ? form.benefits.split('\n').filter(Boolean) : [],
+    eligibility: form.eligibility ? form.eligibility.split('\n').filter(Boolean) : [],
+    documents: form.documents ? form.documents.split('\n').filter(Boolean) : [],
+    minAmount: form.minAmount ? Number(form.minAmount) : null,
+    maxAmount: form.maxAmount ? Number(form.maxAmount) : null,
+    displayOrder: Number(form.displayOrder) || 0,
+  });
+
   const openEdit = (p) => {
     setEditing(p);
-    setForm({ ...p, displayOrder: p.displayOrder || 0 });
+    setForm(toFormData(p));
     setShowForm(true);
   };
 
@@ -115,12 +151,12 @@ export default function LoanProducts() {
                     </td>
                     <td className="px-4 py-3 text-xs text-neutral-600 font-mono">{p.slug}</td>
                     <td className="px-4 py-3">
-                      {p.status === 'active'
+                      {p.isActive
                         ? <span className="badge bg-green-100 text-green-700">Active</span>
                         : <span className="badge bg-neutral-100 text-neutral-600">Inactive</span>}
                     </td>
-                    <td className="px-4 py-3 text-xs text-neutral-600">{p.amount || '—'}</td>
-                    <td className="px-4 py-3 text-xs text-neutral-600">{p.tenure || '—'}</td>
+                    <td className="px-4 py-3 text-xs text-neutral-600">{p.minAmount && p.maxAmount ? `₹${p.minAmount} - ₹${p.maxAmount}` : '—'}</td>
+                    <td className="px-4 py-3 text-xs text-neutral-600">{p.tenureText || '—'}</td>
                     <td className="px-4 py-3">
                       <span className="text-sm font-medium text-neutral-700">{p.displayOrder || 0}</span>
                     </td>
@@ -168,22 +204,39 @@ export default function LoanProducts() {
                 </div>
               </div>
               <div>
+                <label className="label">Loan Type *</label>
+                <select value={form.loanType} onChange={e => setForm(p => ({ ...p, loanType: e.target.value }))} className="input-field">
+                  <option value="">Select loan type</option>
+                  {LOAN_TYPES.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}
+                </select>
+              </div>
+              <div>
+                <label className="label">Short Description</label>
+                <input value={form.shortDescription} onChange={e => setForm(p => ({ ...p, shortDescription: e.target.value }))} className="input-field" placeholder="Brief summary" />
+              </div>
+              <div>
                 <label className="label">Description *</label>
                 <textarea rows={2} value={form.description} onChange={e => setForm(p => ({ ...p, description: e.target.value }))} className="input-field resize-none" placeholder="Product description" />
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="label">Amount</label>
-                  <input value={form.amount} onChange={e => setForm(p => ({ ...p, amount: e.target.value }))} className="input-field" placeholder="e.g. Up to ₹5 Lakh" />
+                  <label className="label">Min Amount</label>
+                  <input value={form.minAmount} onChange={e => setForm(p => ({ ...p, minAmount: e.target.value }))} className="input-field" placeholder="e.g. 10000" />
+                </div>
+                <div>
+                  <label className="label">Max Amount</label>
+                  <input value={form.maxAmount} onChange={e => setForm(p => ({ ...p, maxAmount: e.target.value }))} className="input-field" placeholder="e.g. 500000" />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="label">Interest Rate</label>
+                  <input value={form.interestRateText} onChange={e => setForm(p => ({ ...p, interestRateText: e.target.value }))} className="input-field" placeholder="e.g. 10.5% - 15% p.a." />
                 </div>
                 <div>
                   <label className="label">Tenure</label>
-                  <input value={form.tenure} onChange={e => setForm(p => ({ ...p, tenure: e.target.value }))} className="input-field" placeholder="e.g. 12 - 60 months" />
+                  <input value={form.tenureText} onChange={e => setForm(p => ({ ...p, tenureText: e.target.value }))} className="input-field" placeholder="e.g. 12 - 60 months" />
                 </div>
-              </div>
-              <div>
-                <label className="label">Interest Info</label>
-                <input value={form.interestInfo} onChange={e => setForm(p => ({ ...p, interestInfo: e.target.value }))} className="input-field" placeholder="e.g. 10.5% - 15% p.a." />
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
@@ -201,10 +254,10 @@ export default function LoanProducts() {
               </div>
               <div className="grid grid-cols-3 gap-3">
                 <div>
-                  <label className="label">Status</label>
-                  <select value={form.status} onChange={e => setForm(p => ({ ...p, status: e.target.value }))} className="input-field">
-                    <option value="active">Active</option>
-                    <option value="inactive">Inactive</option>
+                  <label className="label">Active</label>
+                  <select value={form.isActive ? 'true' : 'false'} onChange={e => setForm(p => ({ ...p, isActive: e.target.value === 'true' }))} className="input-field">
+                    <option value="true">Yes</option>
+                    <option value="false">No</option>
                   </select>
                 </div>
                 <div>

@@ -36,7 +36,7 @@ function DropdownMenu({ items, onClose }) {
     >
       <div className="p-2">
         {items.map(item => (
-          <Link key={item.to} to={item.to} onClick={onClose}
+          <Link key={item.to} to={item.to} onPointerDown={onClose} onClick={onClose}
             className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-neutral-700 hover:bg-brand-50 hover:text-brand-700 font-medium transition-colors group"
           >
             <span className="w-1.5 h-1.5 rounded-full bg-neutral-300 group-hover:bg-brand-500 transition-colors flex-shrink-0" />
@@ -59,7 +59,7 @@ function CalcDropdown({ items, onClose }) {
     >
       <div className="p-2">
         {items.map(item => (
-          <Link key={item.to} to={item.to} onClick={onClose}
+          <Link key={item.to} to={item.to} onPointerDown={onClose} onClick={onClose}
             className="flex items-start gap-3 px-3 py-3 rounded-xl hover:bg-brand-50 transition-colors group"
           >
             <div className="w-8 h-8 bg-brand-100 rounded-lg flex items-center justify-center flex-shrink-0 group-hover:bg-brand-200 transition-colors mt-0.5">
@@ -83,24 +83,47 @@ export default function Navbar() {
   const [calcOpen, setCalcOpen] = useState(false);
   const loansRef = useRef(null);
   const calcRef = useRef(null);
+  const loansTimeoutRef = useRef(null);
+  const calcTimeoutRef = useRef(null);
   const navigate = useNavigate();
   const location = useLocation();
 
   const { scrollY } = useScroll();
   useMotionValueEvent(scrollY, 'change', (y) => setScrolled(y > 24));
 
+  const openLoans = () => {
+    if (loansTimeoutRef.current) clearTimeout(loansTimeoutRef.current);
+    setLoansOpen(true);
+  };
+  const closeLoans = () => {
+    loansTimeoutRef.current = setTimeout(() => setLoansOpen(false), 120);
+  };
+  const openCalc = () => {
+    if (calcTimeoutRef.current) clearTimeout(calcTimeoutRef.current);
+    setCalcOpen(true);
+  };
+  const closeCalc = () => {
+    calcTimeoutRef.current = setTimeout(() => setCalcOpen(false), 120);
+  };
+  const closeDropdowns = () => {
+    if (loansTimeoutRef.current) clearTimeout(loansTimeoutRef.current);
+    if (calcTimeoutRef.current) clearTimeout(calcTimeoutRef.current);
+    setLoansOpen(false);
+    setCalcOpen(false);
+  };
+  const closeMobileMenu = () => setMobileOpen(false);
+
   // Close dropdowns on route change
   useEffect(() => {
     setMobileOpen(false);
-    setLoansOpen(false);
-    setCalcOpen(false);
+    closeDropdowns();
   }, [location.pathname]);
 
   // Close on outside click
   useEffect(() => {
     const handler = (e) => {
-      if (loansRef.current && !loansRef.current.contains(e.target)) setLoansOpen(false);
-      if (calcRef.current && !calcRef.current.contains(e.target)) setCalcOpen(false);
+      if (loansRef.current && !loansRef.current.contains(e.target)) closeDropdowns();
+      if (calcRef.current && !calcRef.current.contains(e.target)) closeDropdowns();
     };
     document.addEventListener('mousedown', handler);
     return () => document.removeEventListener('mousedown', handler);
@@ -130,8 +153,8 @@ export default function Navbar() {
               {/* Loans dropdown */}
               <div ref={loansRef} className="relative">
                 <button
-                  onMouseEnter={() => setLoansOpen(true)}
-                  onMouseLeave={() => setLoansOpen(false)}
+                  onMouseEnter={openLoans}
+                  onMouseLeave={closeLoans}
                   onClick={() => setLoansOpen(v => !v)}
                   className={`flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-sm font-medium transition-all duration-150 ${loansOpen ? 'text-brand-600 bg-brand-50' : 'text-neutral-600 hover:text-neutral-900 hover:bg-neutral-100'}`}
                 >
@@ -140,8 +163,8 @@ export default function Navbar() {
                 </button>
                 <AnimatePresence>
                   {loansOpen && (
-                    <div onMouseEnter={() => setLoansOpen(true)} onMouseLeave={() => setLoansOpen(false)}>
-                      <DropdownMenu items={loanLinks} onClose={() => setLoansOpen(false)} />
+                    <div onMouseEnter={openLoans} onMouseLeave={closeLoans}>
+                      <DropdownMenu items={loanLinks} onClose={closeDropdowns} />
                     </div>
                   )}
                 </AnimatePresence>
@@ -150,8 +173,8 @@ export default function Navbar() {
               {/* Calculators dropdown */}
               <div ref={calcRef} className="relative">
                 <button
-                  onMouseEnter={() => setCalcOpen(true)}
-                  onMouseLeave={() => setCalcOpen(false)}
+                  onMouseEnter={openCalc}
+                  onMouseLeave={closeCalc}
                   onClick={() => setCalcOpen(v => !v)}
                   className={`flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-sm font-medium transition-all duration-150 ${calcOpen ? 'text-brand-600 bg-brand-50' : 'text-neutral-600 hover:text-neutral-900 hover:bg-neutral-100'}`}
                 >
@@ -160,8 +183,8 @@ export default function Navbar() {
                 </button>
                 <AnimatePresence>
                   {calcOpen && (
-                    <div onMouseEnter={() => setCalcOpen(true)} onMouseLeave={() => setCalcOpen(false)}>
-                      <CalcDropdown items={calcLinks} onClose={() => setCalcOpen(false)} />
+                    <div onMouseEnter={openCalc} onMouseLeave={closeCalc}>
+                      <CalcDropdown items={calcLinks} onClose={closeDropdowns} />
                     </div>
                   )}
                 </AnimatePresence>
@@ -225,7 +248,7 @@ export default function Navbar() {
                 <p className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest px-3 pb-2">Loan Products</p>
                 <div className="grid grid-cols-2 gap-1">
                   {loanLinks.map(l => (
-                    <Link key={l.to} to={l.to} onClick={() => setMobileOpen(false)}
+                    <Link key={l.to} to={l.to} onPointerDown={closeMobileMenu} onClick={closeMobileMenu}
                       className="px-3 py-2.5 rounded-xl text-sm text-neutral-700 hover:bg-brand-50 hover:text-brand-700 font-medium transition-colors"
                     >{l.label}</Link>
                   ))}
@@ -234,7 +257,7 @@ export default function Navbar() {
                 <div className="border-t border-neutral-100 my-3" />
                 <p className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest px-3 pb-2">Tools</p>
                 {calcLinks.map(l => (
-                  <Link key={l.to} to={l.to} onClick={() => setMobileOpen(false)}
+                  <Link key={l.to} to={l.to} onPointerDown={closeMobileMenu} onClick={closeMobileMenu}
                     className="flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm text-neutral-700 hover:bg-neutral-50 font-medium transition-colors"
                   >
                     <Calculator className="w-4 h-4 text-brand-500" />
@@ -244,13 +267,13 @@ export default function Navbar() {
 
                 <div className="border-t border-neutral-100 my-3" />
                 {navLinks.map(item => (
-                  <Link key={item.to} to={item.to} onClick={() => setMobileOpen(false)}
+                  <Link key={item.to} to={item.to} onPointerDown={closeMobileMenu} onClick={closeMobileMenu}
                     className="block px-3 py-2.5 rounded-xl text-sm text-neutral-700 hover:bg-neutral-50 font-medium transition-colors"
                   >{item.label}</Link>
                 ))}
 
                 <div className="pt-3 space-y-2">
-                  <Link to="/eligibility" onClick={() => setMobileOpen(false)}
+                  <Link to="/eligibility" onPointerDown={closeMobileMenu} onClick={closeMobileMenu}
                     className="flex items-center justify-center gap-2 w-full px-5 py-3.5 bg-brand-600 text-white text-sm font-semibold rounded-2xl hover:bg-brand-700 transition-colors shadow-brand-sm"
                   >
                     Check Eligibility <ArrowRight className="w-4 h-4" />

@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Link, useNavigate } from 'react-router-dom';
 import {
@@ -8,7 +8,7 @@ import {
   Carrot, Play
 } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
-import { faqsApi, testimonialsApi } from '../api';
+import { faqsApi, getAssetUrl, heroOffersApi, testimonialsApi } from '../api';
 import { LOAN_TYPES } from '../constants';
 import { fadeInUp, staggerContainer, viewportConfig, scaleIn } from '../animations/variants';
 import SectionHeader from '../components/ui/SectionHeader';
@@ -96,13 +96,29 @@ export default function Home() {
   const [formOpen, setFormOpen] = useState(false);
   const [openFaq, setOpenFaq] = useState(null);
   const [testimonialIdx, setTestimonialIdx] = useState(0);
+  const [offerIdx, setOfferIdx] = useState(0);
   const navigate = useNavigate();
 
   const { data: faqData } = useQuery({ queryKey: ['faqs-public'], queryFn: () => faqsApi.getAll({ published: 'true' }), staleTime: 300000 });
   const { data: testimonialData } = useQuery({ queryKey: ['testimonials-public'], queryFn: () => testimonialsApi.getAll({ published: 'true' }), staleTime: 300000 });
+  const { data: heroOfferData } = useQuery({ queryKey: ['hero-offers-public'], queryFn: () => heroOffersApi.getAll({ published: 'true' }), staleTime: 300000 });
 
   const faqs = faqData?.data?.data || [];
   const testimonials = testimonialData?.data?.data || [];
+  const heroOffers = heroOfferData?.data?.data || [];
+  const currentOffer = heroOffers[offerIdx] || heroOffers[0];
+
+  useEffect(() => {
+    setOfferIdx(0);
+  }, [heroOffers.length]);
+
+  useEffect(() => {
+    if (heroOffers.length < 2) return undefined;
+    const interval = window.setInterval(() => {
+      setOfferIdx(index => (index + 1) % heroOffers.length);
+    }, 5000);
+    return () => window.clearInterval(interval);
+  }, [heroOffers.length]);
 
   const autoNext = useCallback(() => {
     if (testimonials.length > 1) {
@@ -180,95 +196,51 @@ export default function Home() {
             </div>
           </motion.div>
 
-          {/* Right - Dashboard Visual */}
+          {/* Right - Bank Offer Carousel */}
           <motion.div
             initial={{ opacity: 0, x: 40 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.6, delay: 0.2 }}
             className="hidden lg:block relative"
           >
-            <div className="relative">
-              {/* Main Card */}
-              <motion.div
-                animate={{ y: [0, -8, 0] }}
-                transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
-                className="bg-white rounded-2xl border border-neutral-200 shadow-float p-6"
-              >
-                <div className="flex items-center justify-between mb-5">
-                  <div>
-                    <p className="text-neutral-400 text-xs font-medium uppercase tracking-wider">Loan Enquiry</p>
-                    <p className="text-neutral-900 font-display font-bold text-xl mt-1">GD-2026-000123</p>
-                  </div>
-                  <span className="px-3 py-1 bg-green-50 text-green-700 text-xs font-semibold rounded-full border border-green-100 flex items-center gap-1.5">
-                    <span className="w-1.5 h-1.5 bg-green-500 rounded-full" /> Active
-                  </span>
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                  {[
-                    { label: 'Loan Type', value: 'Personal Loan', highlight: true },
-                    { label: 'Amount', value: '₹5,00,000', highlight: true },
-                    { label: 'Interest Rate', value: '12% p.a.', highlight: false },
-                    { label: 'Status', value: 'Under Review', highlight: false },
-                  ].map(item => (
-                    <div key={item.label} className="bg-neutral-50 rounded-xl px-4 py-3">
-                      <p className="text-neutral-400 text-xs mb-1">{item.label}</p>
-                      <p className={`font-semibold ${item.highlight ? 'text-brand-600' : 'text-neutral-900'}`}>{item.value}</p>
+            <div className="mx-auto w-full max-w-[500px]">
+              <div className="relative aspect-square overflow-hidden rounded-3xl border border-neutral-200 bg-neutral-100 shadow-float">
+                <AnimatePresence mode="sync" initial={false}>
+                  {heroOffers.length > 0 ? (
+                    <motion.img
+                      key={currentOffer.id}
+                      src={getAssetUrl(currentOffer.imageUrl)}
+                      alt={currentOffer.title}
+                      initial={{ x: '100%' }}
+                      animate={{ x: 0 }}
+                      exit={{ x: '-100%' }}
+                      transition={{ duration: 0.45, ease: 'easeInOut' }}
+                      className="absolute inset-0 h-full w-full object-cover"
+                    />
+                  ) : (
+                    <motion.img
+                      src={heroImage}
+                      alt="Featured loan offers"
+                      className="absolute inset-0 h-full w-full object-cover"
+                    />
+                  )}
+                </AnimatePresence>
+                {heroOffers.length > 0 && (
+                  <div className="absolute inset-x-0 bottom-0 flex justify-center pb-4">
+                    <div className="flex items-center gap-1.5 rounded-full bg-black/25 px-3 py-2" aria-label="Offer slides">
+                      {heroOffers.map((offer, index) => (
+                        <button
+                          key={offer.id}
+                          type="button"
+                          aria-label={`Show ${offer.title}`}
+                          onClick={() => setOfferIdx(index)}
+                          className={`h-2 rounded-full transition-all ${index === offerIdx ? 'w-6 bg-white' : 'w-2 bg-white/60'}`}
+                        />
+                      ))}
                     </div>
-                  ))}
-                </div>
-              </motion.div>
-
-              {/* Floating EMI Card */}
-              <motion.div
-                animate={{ y: [0, 6, 0] }}
-                transition={{ duration: 3.5, repeat: Infinity, ease: 'easeInOut', delay: 0.5 }}
-                className="absolute -bottom-6 -left-8 bg-white rounded-2xl shadow-xl border border-neutral-100 p-4 w-52"
-              >
-                <div className="flex items-center gap-3 mb-2">
-                  <div className="w-9 h-9 bg-brand-50 rounded-xl flex items-center justify-center">
-                    <TrendingUp className="w-4 h-4 text-brand-600" />
                   </div>
-                  <div>
-                    <p className="text-xs text-neutral-400">Monthly EMI</p>
-                    <p className="text-lg font-display font-bold text-neutral-900">₹34,470</p>
-                  </div>
-                </div>
-                <div className="h-1.5 bg-neutral-100 rounded-full overflow-hidden">
-                  <div className="h-full bg-brand-500 rounded-full w-[65%]" />
-                </div>
-                <p className="text-[10px] text-neutral-400 mt-1.5">65% complete</p>
-              </motion.div>
-
-              {/* Floating Trust Card */}
-              <motion.div
-                animate={{ y: [0, -5, 0] }}
-                transition={{ duration: 5, repeat: Infinity, ease: 'easeInOut', delay: 1 }}
-                className="absolute -top-4 -right-4 bg-white rounded-xl shadow-lg border border-neutral-100 p-3 flex items-center gap-2.5"
-              >
-                <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0">
-                  <FileCheck className="w-4 h-4 text-green-600" />
-                </div>
-                <div>
-                  <p className="text-xs font-semibold text-neutral-900">Eligibility Verified</p>
-                  <p className="text-[10px] text-neutral-400">High chance of approval</p>
-                </div>
-              </motion.div>
-
-              {/* Floating Small Card */}
-              <motion.div
-                animate={{ y: [0, -4, 0] }}
-                transition={{ duration: 4.5, repeat: Infinity, ease: 'easeInOut', delay: 1.5 }}
-                className="absolute top-1/2 -right-8 bg-white/90 backdrop-blur rounded-xl shadow-lg border border-neutral-100 p-3"
-              >
-                <div className="flex items-center gap-1.5">
-                  <Lock className="w-3.5 h-3.5 text-brand-500" />
-                  <span className="text-[11px] font-medium text-neutral-600">Secure & Private</span>
-                </div>
-              </motion.div>
-
-              {/* Decorative elements */}
-              <div className="absolute -bottom-12 -right-12 w-40 h-40 bg-brand-50 rounded-full blur-2xl opacity-60" />
-              <div className="absolute -top-8 -left-8 w-32 h-32 bg-brand-50 rounded-full blur-2xl opacity-40" />
+                )}
+              </div>
             </div>
           </motion.div>
         </div>
@@ -285,7 +257,7 @@ export default function Home() {
             initial="hidden"
             whileInView="visible"
             viewport={viewportConfig}
-            className="grid grid-cols-2 md:grid-cols-5 gap-3 sm:gap-6"
+            className="grid grid-cols-2 md:grid-cols-5 gap-x-4 gap-y-3 sm:gap-x-6 sm:gap-y-4"
           >
             {[
               { icon: Lock, label: 'Secure Enquiries' },
@@ -294,11 +266,11 @@ export default function Home() {
               { icon: Zap, label: 'Simple Process' },
               { icon: Shield, label: 'Transparent Communication' },
             ].map(({ icon: Icon, label }) => (
-              <motion.div key={label} variants={fadeInUp} className="flex items-center justify-center gap-2 sm:gap-2.5">
-                <div className="w-7 h-7 sm:w-8 sm:h-8 bg-brand-50 rounded-lg flex items-center justify-center flex-shrink-0">
+              <motion.div key={label} variants={fadeInUp} className="flex min-w-0 items-center justify-start gap-2 sm:gap-2.5">
+                <div className="h-7 w-7 sm:h-8 sm:w-8 bg-brand-50 rounded-lg flex items-center justify-center flex-shrink-0">
                   <Icon className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-brand-600" />
                 </div>
-                <span className="text-xs sm:text-sm font-medium text-neutral-700 leading-snug">{label}</span>
+                <span className="min-w-0 text-xs sm:text-sm font-medium text-neutral-700 leading-snug">{label}</span>
               </motion.div>
             ))}
           </motion.div>

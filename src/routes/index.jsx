@@ -32,6 +32,7 @@ const AdminReports = lazy(() => import('../pages/admin/Reports'));
 const AdminUsers = lazy(() => import('../pages/admin/Users'));
 const AdminFAQs = lazy(() => import('../pages/admin/FAQs'));
 const AdminTestimonials = lazy(() => import('../pages/admin/Testimonials'));
+const AdminHeroOffers = lazy(() => import('../pages/admin/HeroOffers'));
 const AdminSettings = lazy(() => import('../pages/admin/AdminSettings'));
 
 export default function AppRoutes() {
@@ -68,6 +69,7 @@ export default function AppRoutes() {
           <Route path="users" element={<ProtectedRoute roles={['SUPER_ADMIN','ADMIN']}><AdminUsers /></ProtectedRoute>} />
           <Route path="faqs" element={<AdminFAQs />} />
           <Route path="testimonials" element={<AdminTestimonials />} />
+          <Route path="hero-offers" element={<ProtectedRoute roles={['SUPER_ADMIN','ADMIN']}><AdminHeroOffers /></ProtectedRoute>} />
           <Route path="settings" element={<ProtectedRoute roles={['SUPER_ADMIN','ADMIN']}><AdminSettings /></ProtectedRoute>} />
         </Route>
 

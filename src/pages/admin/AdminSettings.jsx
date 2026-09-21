@@ -5,6 +5,16 @@ import { settingsApi } from '../../api';
 import { PageLoader } from '../../components/ui/Spinner';
 import { useToast } from '../../components/ui/Toast';
 
+function Field({ label, value, onChange, type = 'text', placeholder = '' }) {
+  return (
+    <div>
+      <label className="label">{label}</label>
+      <input type={type} value={value || ''} onChange={onChange}
+        className="input-field" placeholder={placeholder} />
+    </div>
+  );
+}
+
 export default function AdminSettings() {
   const { toast } = useToast();
   const qc = useQueryClient();
@@ -37,14 +47,6 @@ export default function AdminSettings() {
 
   if (isLoading || !form) return <PageLoader />;
 
-  const Field = ({ label, name, type = 'text', placeholder = '' }) => (
-    <div>
-      <label className="label">{label}</label>
-      <input type={type} value={form[name] || ''} onChange={e => setForm(p => ({ ...p, [name]: e.target.value }))}
-        className="input-field" placeholder={placeholder} />
-    </div>
-  );
-
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
@@ -57,11 +59,11 @@ export default function AdminSettings() {
           <div><h3 className="font-display font-bold text-neutral-900">General Settings</h3><p className="text-xs text-neutral-400">Update company information</p></div>
         </div>
         <div className="grid grid-cols-2 gap-4">
-          <Field label="Company Name" name="companyName" placeholder="Good Debt" />
-          <Field label="Company Phone" name="companyPhone" placeholder="+91 99999 99999" />
-          <Field label="Company Email" name="companyEmail" placeholder="info@gooddebt.in" />
-          <Field label="WhatsApp" name="companyWhatsApp" placeholder="+91 99999 99999" />
-          <Field label="Company Address" name="companyAddress" placeholder="Mumbai, India" />
+          <Field label="Company Name" value={form.companyName} onChange={e => setForm(p => ({ ...p, companyName: e.target.value }))} placeholder="Good Debt" />
+          <Field label="Company Phone" value={form.companyPhone} onChange={e => setForm(p => ({ ...p, companyPhone: e.target.value }))} placeholder="+91 99999 99999" />
+          <Field label="Company Email" value={form.companyEmail} onChange={e => setForm(p => ({ ...p, companyEmail: e.target.value }))} placeholder="info@gooddebt.in" />
+          <Field label="WhatsApp" value={form.companyWhatsApp} onChange={e => setForm(p => ({ ...p, companyWhatsApp: e.target.value }))} placeholder="+91 99999 99999" />
+          <Field label="Company Address" value={form.companyAddress} onChange={e => setForm(p => ({ ...p, companyAddress: e.target.value }))} placeholder="Mumbai, India" />
           <div>
             <label className="label">Currency Symbol</label>
             <input value={form.currencySymbol || '₹'} onChange={e => setForm(p => ({ ...p, currencySymbol: e.target.value }))} className="input-field" />

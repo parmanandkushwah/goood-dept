@@ -1,5 +1,11 @@
 import api from './axios';
 
+export const getAssetUrl = (assetPath) => {
+  if (!assetPath || /^https?:\/\//.test(assetPath)) return assetPath;
+  const apiOrigin = (import.meta.env.VITE_API_URL || '').replace(/\/api\/?$/, '');
+  return `${apiOrigin}${assetPath}`;
+};
+
 export const authApi = {
   login: (data) => api.post('/auth/login', data),
   logout: () => api.post('/auth/logout'),
@@ -69,6 +75,13 @@ export const testimonialsApi = {
 export const settingsApi = {
   getAll: () => api.get('/settings'),
   update: (data) => api.patch('/settings', data),
+};
+
+export const heroOffersApi = {
+  getAll: (params) => api.get('/hero-offers', { params }),
+  create: (data) => api.post('/hero-offers', data),
+  update: (id, data) => api.patch(`/hero-offers/${id}`, data),
+  delete: (id) => api.delete(`/hero-offers/${id}`),
 };
 
 export const formFieldApi = {

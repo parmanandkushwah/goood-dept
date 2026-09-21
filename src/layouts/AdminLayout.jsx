@@ -3,7 +3,7 @@ import { Outlet, NavLink, useNavigate, Link, useLocation } from 'react-router-do
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   LayoutDashboard, FileText, Calendar, Package, BarChart2,
-  HelpCircle, Star, Settings, LogOut, Bell, Menu, X, ChevronRight, Plus, Workflow
+  HelpCircle, Star, Settings, LogOut, Bell, Menu, X, ChevronRight, Plus, Workflow, Image
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import logo from '../assets/logo.png';
@@ -13,11 +13,12 @@ const navItems = [
   { to: '/admin/leads', icon: FileText, label: 'Leads' },
   { to: '/admin/follow-ups', icon: Calendar, label: 'Follow-ups' },
   { to: '/admin/loan-products', icon: Package, label: 'Loan Products' },
-  { to: '/admin/form-builder', icon: Workflow, label: 'Form Builder' },
+  // { to: '/admin/form-builder', icon: Workflow, label: 'Form Builder' },
   { to: '/admin/reports', icon: BarChart2, label: 'Reports' },
   { to: '/admin/users', icon: Settings, label: 'Users', roles: ['SUPER_ADMIN', 'ADMIN'] },
   { to: '/admin/faqs', icon: HelpCircle, label: 'FAQs' },
   { to: '/admin/testimonials', icon: Star, label: 'Testimonials' },
+  { to: '/admin/hero-offers', icon: Image, label: 'Hero Offers', roles: ['SUPER_ADMIN', 'ADMIN'] },
   { to: '/admin/settings', icon: Settings, label: 'Settings', roles: ['SUPER_ADMIN', 'ADMIN'] },
 ];
 
@@ -43,7 +44,7 @@ export default function AdminLayout() {
       <div className="p-5 border-b border-white/10 flex items-center justify-between gap-3">
         <Link to="/admin/dashboard" onClick={() => setSidebarOpen(false)} className="flex min-w-0 flex-1 items-center gap-2.5">
           <img src={logo} alt="GoodDebt" className="h-12 w-36 flex-shrink-0 object-contain object-left" />
-          <span className="rounded-md bg-white/10 px-2 py-1 text-[10px] font-semibold uppercase tracking-wider text-white/70">Admin</span>
+          {/* <span className="rounded-md bg-white/10 px-2 py-1 text-[10px] font-semibold uppercase tracking-wider text-white/70">Admin</span> */}
         </Link>
         <button
           type="button"

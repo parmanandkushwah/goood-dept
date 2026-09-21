@@ -70,8 +70,8 @@ export default function FollowUps() {
                   <tr key={f.id} className="hover:bg-neutral-50/80 transition-colors">
                     <td className="px-4 py-3 text-xs font-mono text-brand-600">{f.id}</td>
                     <td className="px-4 py-3">
-                      <p className="text-sm font-medium text-neutral-900">{f.customerName || '—'}</p>
-                      <p className="text-xs text-neutral-400">{f.customerMobile || '—'}</p>
+                      <p className="text-sm font-medium text-neutral-900">{f.lead?.fullName || '—'}</p>
+                      <p className="text-xs text-neutral-400">{f.lead?.mobile || '—'}</p>
                     </td>
                     <td className="px-4 py-3 text-xs text-neutral-600">{f.lead?.leadNumber || '—'}</td>
                     <td className="px-4 py-3 text-xs text-neutral-600">{f.lead?.loanType ? f.lead.loanType.replace(/-/g, ' ') : '—'}</td>
