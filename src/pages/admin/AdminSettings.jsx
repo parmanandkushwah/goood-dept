@@ -27,19 +27,39 @@ export default function AdminSettings() {
   });
 
   useEffect(() => {
-    if (data?.data?.data) setForm(data.data.data);
+    if (data?.data?.data) {
+      const settings = data.data.data;
+      setForm({
+        companyName: settings.company_name || '',
+        companyPhone: settings.company_phone || '',
+        companyEmail: settings.company_email || '',
+        companyWhatsApp: settings.company_whatsapp || '',
+        companyAddress: settings.company_address || '',
+        currencySymbol: settings.currency_symbol || '₹',
+      });
+    }
   }, [data]);
 
   const updateMutation = useMutation({
     mutationFn: settingsApi.update,
-    onSuccess: () => { toast('Settings saved', 'success'); },
+    onSuccess: () => {
+      toast('Settings saved', 'success');
+      qc.invalidateQueries({ queryKey: ['company-settings'] });
+    },
     onError: () => toast('Failed to save', 'error'),
   });
 
   const handleSave = () => {
     if (!form) return;
     setIsSaving(true);
-    updateMutation.mutate(form, {
+    updateMutation.mutate({
+      company_name: form.companyName,
+      company_phone: form.companyPhone,
+      company_email: form.companyEmail,
+      company_whatsapp: form.companyWhatsApp,
+      company_address: form.companyAddress,
+      currency_symbol: form.currencySymbol,
+    }, {
       onSuccess: () => setIsSaving(false),
       onError: () => setIsSaving(false),
     });

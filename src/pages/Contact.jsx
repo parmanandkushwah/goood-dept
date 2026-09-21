@@ -2,16 +2,17 @@ import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Phone, Mail, MessageCircle, MapPin, Send, ChevronRight, ArrowRight } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
-import { COMPANY_PHONE, COMPANY_EMAIL, COMPANY_WHATSAPP } from '../constants';
 import { fadeInUp, viewportConfig } from '../animations/variants';
 import SectionHeader from '../components/ui/SectionHeader';
 import { useToast } from '../components/ui/Toast';
+import { useCompanySettings } from '../hooks/useCompanySettings';
 
 export default function Contact() {
   const [form, setForm] = useState({ name: '', mobile: '', email: '', message: '' });
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
+  const { companyPhone, companyEmail, companyWhatsApp, companyAddress } = useCompanySettings();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -49,10 +50,10 @@ export default function Contact() {
               <h2 className="heading-md mb-4">Contact Information</h2>
               <div className="mb-5 grid grid-cols-2 gap-2 sm:gap-3 lg:mb-6">
                 {[
-                  { icon: Phone, label: 'Phone', value: COMPANY_PHONE, href: `tel:${COMPANY_PHONE}` },
-                  { icon: Mail, label: 'Email', value: COMPANY_EMAIL, href: `mailto:${COMPANY_EMAIL}` },
-                  { icon: MessageCircle, label: 'WhatsApp', value: 'Chat with us on WhatsApp', href: `https://wa.me/${COMPANY_WHATSAPP.replace('+', '')}` },
-                  { icon: MapPin, label: 'Location', value: 'Mumbai, Maharashtra, India', href: null },
+                  { icon: Phone, label: 'Phone', value: companyPhone, href: `tel:${companyPhone}` },
+                  { icon: Mail, label: 'Email', value: companyEmail, href: `mailto:${companyEmail}` },
+                  { icon: MessageCircle, label: 'WhatsApp', value: 'Chat with us on WhatsApp', href: `https://wa.me/${companyWhatsApp.replace('+', '')}` },
+                  { icon: MapPin, label: 'Location', value: companyAddress, href: null },
                 ].map(({ icon: Icon, label, value, href }) => (
                   <div key={label} className="flex min-w-0 flex-col gap-2 rounded-xl p-3 hover:bg-neutral-50 transition-colors sm:flex-row sm:items-start sm:gap-3 sm:p-3.5">
                     <div className="w-9 h-9 sm:w-10 sm:h-10 bg-brand-50 rounded-xl flex items-center justify-center flex-shrink-0">

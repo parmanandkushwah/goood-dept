@@ -4,6 +4,7 @@ import { motion, AnimatePresence, useScroll, useMotionValueEvent } from 'framer-
 import { ChevronDown, Menu, X, ArrowRight, Calculator, Phone } from 'lucide-react';
 import { LOAN_TYPES } from '../../constants';
 import logo from '../../assets/logo.png';
+import { useCompanySettings } from '../../hooks/useCompanySettings';
 
 const loanLinks = LOAN_TYPES.map(l => ({ to: `/loans/${l.value}`, label: l.label }));
 
@@ -87,6 +88,7 @@ export default function Navbar() {
   const calcTimeoutRef = useRef(null);
   const navigate = useNavigate();
   const location = useLocation();
+  const { companyPhone } = useCompanySettings();
 
   const { scrollY } = useScroll();
   useMotionValueEvent(scrollY, 'change', (y) => setScrolled(y > 24));
@@ -201,11 +203,11 @@ export default function Navbar() {
 
             {/* Desktop CTA */}
             <div className="hidden lg:flex items-center gap-3">
-              <a href="tel:+919999999999"
+              <a href={`tel:${companyPhone}`}
                 className="flex items-center gap-1.5 text-sm font-medium text-neutral-600 hover:text-brand-600 transition-colors px-2 py-1.5"
               >
                 <Phone className="w-3.5 h-3.5" />
-                <span className="hidden xl:inline">+91 99999 99999</span>
+                <span className="hidden xl:inline">{companyPhone}</span>
               </a>
               <motion.button
                 whileHover={{ scale: 1.02 }}
@@ -278,7 +280,7 @@ export default function Navbar() {
                   >
                     Check Eligibility <ArrowRight className="w-4 h-4" />
                   </Link>
-                  <a href="tel:+919999999999"
+                  <a href={`tel:${companyPhone}`}
                     className="flex items-center justify-center gap-2 w-full px-5 py-3.5 bg-neutral-100 text-neutral-700 text-sm font-semibold rounded-2xl hover:bg-neutral-200 transition-colors"
                   >
                     <Phone className="w-4 h-4" /> Call Us
@@ -293,7 +295,7 @@ export default function Navbar() {
       {/* Mobile sticky bottom CTA */}
       <div className="fixed bottom-0 left-0 right-0 z-30 lg:hidden">
         <div className="bg-white border-t border-neutral-200 px-4 py-3 flex gap-3 shadow-2xl">
-          <a href="tel:+919999999999"
+          <a href={`tel:${companyPhone}`}
             className="flex items-center justify-center gap-2 flex-1 py-3 bg-neutral-100 text-neutral-700 text-sm font-semibold rounded-xl hover:bg-neutral-200 transition-colors"
           >
             <Phone className="w-4 h-4" /> Call

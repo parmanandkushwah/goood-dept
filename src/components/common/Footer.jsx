@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom';
 import { Phone, Mail, MapPin, MessageCircle, ChevronRight } from 'lucide-react';
-import { COMPANY_PHONE, COMPANY_EMAIL, COMPANY_WHATSAPP } from '../../constants';
 import logo from '../../assets/logo.png';
+import { useCompanySettings } from '../../hooks/useCompanySettings';
 
 const loanLinks = [
   { to: '/loans/personal-loan', label: 'Personal Loan' },
@@ -22,6 +22,7 @@ const partnerLogos = [
 
 export default function Footer() {
   const scrollToTop = () => window.scrollTo({ top: 0, behavior: 'smooth' });
+  const { companyPhone, companyEmail, companyWhatsApp, footerDisclaimer } = useCompanySettings();
 
   return (
     <footer className="bg-neutral-900 text-neutral-300">
@@ -54,19 +55,19 @@ export default function Footer() {
               Good Debt assists customers in exploring loan options and connecting with suitable lending partners. Get personalized guidance for your financial needs.
             </p>
             <div className="grid grid-cols-2 gap-2 sm:block sm:space-y-2">
-              <a href={`tel:${COMPANY_PHONE}`} className="flex items-center gap-2 text-xs sm:text-sm text-neutral-400 hover:text-white transition-colors group">
+              <a href={`tel:${companyPhone}`} className="flex items-center gap-2 text-xs sm:text-sm text-neutral-400 hover:text-white transition-colors group">
                 <div className="w-6 h-6 sm:w-7 sm:h-7 bg-neutral-800 group-hover:bg-brand-900 rounded-lg flex items-center justify-center transition-colors">
                   <Phone className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-brand-400" />
                 </div>
-                <span className="truncate">{COMPANY_PHONE}</span>
+                <span className="truncate">{companyPhone}</span>
               </a>
-              <a href={`mailto:${COMPANY_EMAIL}`} className="flex items-center gap-2 text-xs sm:text-sm text-neutral-400 hover:text-white transition-colors group">
+              <a href={`mailto:${companyEmail}`} className="flex items-center gap-2 text-xs sm:text-sm text-neutral-400 hover:text-white transition-colors group">
                 <div className="w-6 h-6 sm:w-7 sm:h-7 bg-neutral-800 group-hover:bg-brand-900 rounded-lg flex items-center justify-center transition-colors">
                   <Mail className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-brand-400" />
                 </div>
-                <span className="truncate">{COMPANY_EMAIL}</span>
+                <span className="truncate">{companyEmail}</span>
               </a>
-              <a href={`https://wa.me/${COMPANY_WHATSAPP.replace('+', '')}`} target="_blank" rel="noopener noreferrer"
+              <a href={`https://wa.me/${companyWhatsApp.replace('+', '')}`} target="_blank" rel="noopener noreferrer"
                 className="flex items-center gap-2 text-xs sm:text-sm text-neutral-400 hover:text-white transition-colors group">
                 <div className="w-6 h-6 sm:w-7 sm:h-7 bg-neutral-800 group-hover:bg-green-900/40 rounded-lg flex items-center justify-center transition-colors">
                   <MessageCircle className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-green-400" />
@@ -125,7 +126,7 @@ export default function Footer() {
         <div className="mt-6 sm:mt-8 lg:mt-10 pt-4 sm:pt-5 lg:pt-6 border-t border-neutral-800">
           <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-3 lg:gap-4">
             <p className="text-xs text-neutral-500 leading-relaxed max-w-3xl">
-              <strong className="text-neutral-400">Disclaimer:</strong> Good Debt is a loan assistance service (DSA). We assist customers in exploring loan options and connecting with suitable lending partners. Loan approval, interest rates, tenure and final terms are subject to the respective lender's eligibility criteria, policies and approval. Good Debt does not guarantee loan approval.
+              <strong className="text-neutral-400">Disclaimer:</strong> {footerDisclaimer || "Good Debt is a loan assistance service (DSA). We assist customers in exploring loan options and connecting with suitable lending partners. Loan approval, interest rates, tenure and final terms are subject to the respective lender's eligibility criteria, policies and approval. Good Debt does not guarantee loan approval."}
             </p>
             <p className="text-xs text-neutral-600 whitespace-nowrap">© {new Date().getFullYear()} Good Debt. All rights reserved.</p>
           </div>

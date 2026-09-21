@@ -2,11 +2,12 @@ import { motion } from 'framer-motion';
 import { CheckCircle, Home, ArrowLeft } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 import { formatCurrency, formatDate, getLoanTypeLabel } from '../utils';
-import { COMPANY_PHONE, COMPANY_WHATSAPP } from '../constants';
+import { useCompanySettings } from '../hooks/useCompanySettings';
 
 export default function ThankYou() {
   const { state } = useLocation();
   const lead = state?.lead;
+  const { companyPhone, companyWhatsApp } = useCompanySettings();
 
   return (
     <div className="min-h-screen bg-neutral-50 flex items-center justify-center px-4 py-20">
@@ -53,10 +54,10 @@ export default function ThankYou() {
           <Link to="/" className="flex items-center justify-center gap-2 w-full px-5 py-3 bg-brand-600 text-white font-semibold rounded-xl hover:bg-brand-700 transition-colors text-sm">
             <Home className="w-4 h-4" /> Back to Home
           </Link>
-          <a href={`tel:${COMPANY_PHONE}`} className="flex items-center justify-center gap-2 w-full px-5 py-3 bg-neutral-100 text-neutral-700 font-semibold rounded-xl hover:bg-neutral-200 transition-colors text-sm">
+          <a href={`tel:${companyPhone}`} className="flex items-center justify-center gap-2 w-full px-5 py-3 bg-neutral-100 text-neutral-700 font-semibold rounded-xl hover:bg-neutral-200 transition-colors text-sm">
             <span className="text-lg">📞</span> Call Good Debt
           </a>
-          <a href={`https://wa.me/${COMPANY_WHATSAPP.replace('+', '')}`} target="_blank" rel="noopener noreferrer"
+          <a href={`https://wa.me/${companyWhatsApp.replace('+', '')}`} target="_blank" rel="noopener noreferrer"
             className="flex items-center justify-center gap-2 w-full px-5 py-3 bg-green-50 text-green-700 font-semibold rounded-xl hover:bg-green-100 transition-colors border border-green-200 text-sm">
             WhatsApp Good Debt
           </a>

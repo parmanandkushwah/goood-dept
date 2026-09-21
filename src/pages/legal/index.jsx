@@ -1,5 +1,6 @@
 import { motion } from 'framer-motion';
 import { fadeInUp } from '../../animations/variants';
+import { useCompanySettings } from '../../hooks/useCompanySettings';
 
 function LegalPage({ title, children }) {
   return (
@@ -22,6 +23,8 @@ function LegalPage({ title, children }) {
 }
 
 export function PrivacyPolicy() {
+  const { companyEmail } = useCompanySettings();
+
   return (
     <LegalPage title="Privacy Policy">
       <div className="space-y-5 sm:space-y-6 text-neutral-600 text-sm leading-relaxed">
@@ -29,8 +32,8 @@ export function PrivacyPolicy() {
         <div><h2 className="text-lg font-bold text-neutral-900 mb-2">2. How We Use Your Information</h2><p>Your information is used to: process your loan enquiry, connect you with suitable lending partners, contact you regarding your enquiry, improve our services, and comply with legal obligations. We do not sell your personal information to third parties.</p></div>
         <div><h2 className="text-lg font-bold text-neutral-900 mb-2">3. Information Sharing</h2><p>We may share your information with lending partners and financial institutions for the purpose of processing your loan enquiry. We ensure that such partners maintain appropriate data protection standards.</p></div>
         <div><h2 className="text-lg font-bold text-neutral-900 mb-2">4. Data Security</h2><p>We implement appropriate technical and organizational measures to protect your personal information against unauthorized access, alteration, disclosure, or destruction.</p></div>
-        <div><h2 className="text-lg font-bold text-neutral-900 mb-2">5. Your Rights</h2><p>You have the right to access, correct, or request deletion of your personal information. To exercise these rights, please contact us at info@gooddebt.in.</p></div>
-        <div><h2 className="text-lg font-bold text-neutral-900 mb-2">6. Contact Us</h2><p>For privacy-related queries, contact us at info@gooddebt.in.</p></div>
+        <div><h2 className="text-lg font-bold text-neutral-900 mb-2">5. Your Rights</h2><p>You have the right to access, correct, or request deletion of your personal information. To exercise these rights, please contact us at {companyEmail}.</p></div>
+        <div><h2 className="text-lg font-bold text-neutral-900 mb-2">6. Contact Us</h2><p>For privacy-related queries, contact us at {companyEmail}.</p></div>
       </div>
     </LegalPage>
   );
@@ -52,6 +55,8 @@ export function Terms() {
 }
 
 export function Disclaimer() {
+  const { companyEmail } = useCompanySettings();
+
   return (
     <LegalPage title="Disclaimer">
       <div className="space-y-5 sm:space-y-6 text-neutral-600 text-sm leading-relaxed">

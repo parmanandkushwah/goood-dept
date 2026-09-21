@@ -1,8 +1,11 @@
 import { motion } from 'framer-motion';
 import { fadeInUp, viewportConfig } from '../../animations/variants';
 import SectionHeader from '../../components/ui/SectionHeader';
+import { useCompanySettings } from '../../hooks/useCompanySettings';
 
 export default function PrivacyPolicy() {
+  const { companyEmail } = useCompanySettings();
+
   return (
     <div className="pt-16">
       <section className="bg-gradient-to-br from-neutral-50 to-white py-10 sm:py-14 lg:py-20">
@@ -39,7 +42,7 @@ export default function PrivacyPolicy() {
             </div>
             <div>
               <h2 className="font-display font-bold text-neutral-900 text-lg mb-2">6. Contact Us</h2>
-              <p className="text-sm text-neutral-600 leading-relaxed">For any privacy-related queries, please contact us at info@gooddebt.in.</p>
+              <p className="text-sm text-neutral-600 leading-relaxed">For any privacy-related queries, please contact us at {companyEmail}.</p>
             </div>
           </motion.div>
         </div>
