@@ -208,7 +208,7 @@ export default function LoanPage() {
                 <h2 className="text-lg font-display font-bold text-neutral-900">{product.name} Enquiry</h2>
                 <button onClick={() => setFormOpen(false)} className="p-2 rounded-lg hover:bg-neutral-100 text-neutral-500 transition-colors"><X className="w-5 h-5" /></button>
               </div>
-              <MultiStepForm initialLoanType={product.value} onClose={() => setFormOpen(false)} />
+              <MultiStepForm initialLoanType={product.loanType} onClose={() => setFormOpen(false)} />
             </motion.div>
           </motion.div>
         )}
